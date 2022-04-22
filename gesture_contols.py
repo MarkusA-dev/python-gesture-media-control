@@ -1,4 +1,3 @@
-#from asyncio.windows_events import NULL
 import win32api
 import cv2
 import mediapipe as mp
@@ -18,24 +17,21 @@ frameHeight = 800
 cap = cv2.VideoCapture(0)
 cap.set(3, frameWidth)
 cap.set(4, frameHeight)
-
-cap.set(10, 100)
+cap.set(10, 125)
 
 count = 0
 
-def getAngleTest(xstart, ystart, xend, yend):
+def getAngle(xstart, ystart, xend, yend):
     xdiff = xend - xstart
     ydiff = yend - ystart
     degrees = math.atan2(ydiff, xdiff)*180/math.pi
     return (360+round(degrees))%360
 
-def testFingerDir(list, counting):
+def Finger_dir(list, counting):
     joints = [list[6], list[8], list[10], list[12], list[14], list[16]]
-    #print(counting)
-
-    angle1 = getAngleTest(joints[0][1], joints[0][2], joints[1][1], joints[1][2])
-    angle2 = getAngleTest(joints[2][1], joints[2][2], joints[3][1], joints[3][2])
-    angle3 = getAngleTest(joints[4][1], joints[4][2], joints[5][1], joints[5][2])
+    angle1 = getAngle(joints[0][1], joints[0][2], joints[1][1], joints[1][2])
+    angle2 = getAngle(joints[2][1], joints[2][2], joints[3][1], joints[3][2])
+    angle3 = getAngle(joints[4][1], joints[4][2], joints[5][1], joints[5][2])
 
     if counting % 30 == 0:
         if (angle1 in range(150, 200)) and (angle2 in range(150, 200)) and not (angle3 in range(150, 200)):
@@ -49,7 +45,7 @@ def testFingerDir(list, counting):
 
 with mp_hands.Hands(
     model_complexity = 1,
-    min_detection_confidence = 0.75,
+    min_detection_confidence = 0.8,
     min_tracking_confidence = 0.6,
     max_num_hands = 1
     ) as hands:
@@ -79,11 +75,11 @@ with mp_hands.Hands(
                 count=0
             if len(lmList) != 0:
                 count = count + 1
-                print(getAngleTest(lmList[6][1], lmList[6][2], lmList[8][1], lmList[8][2]))
-                testFingerDir(lmList, count)
+                print(f"I see a hand with the index finger at {getAngle(lmList[6][1], lmList[6][2], lmList[8][1], lmList[8][2])} angle")
+                Finger_dir(lmList, count)
             if count == 30:
                 count = 0
-            cv2.imshow("Result", cv2.flip(image, 1))
+            #cv2.imshow("Result", cv2.flip(image, 1))
             if cv2.waitKey(10) & 0xFF == ord('q'):
                 break
 
